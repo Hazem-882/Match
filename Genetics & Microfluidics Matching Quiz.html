@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Genetics & Microfluidics Matching Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3f4;--surface:#fff;--ink:#14282e;--muted:#5a6e74;--line:#cbd9dc;--accent:#0e7c86;--accent-soft:#d6eef0;--ok:#256b45;--ok-soft:#dcf1e5;--bad:#b3410f;--bad-soft:#fae3d8;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1b1f;--surface:#162a30;--ink:#e6f1f3;--muted:#93aab0;--line:#2b434a;--accent:#4cc3cd;--accent-soft:#1c3f45;--ok:#6fd49a;--ok-soft:#1b3a2a;--bad:#ff9a6b;--bad-soft:#44261a}}
+:root[data-theme="dark"]{--bg:#0e1b1f;--surface:#162a30;--ink:#e6f1f3;--muted:#93aab0;--line:#2b434a;--accent:#4cc3cd;--accent-soft:#1c3f45;--ok:#6fd49a;--ok-soft:#1b3a2a;--bad:#ff9a6b;--bad-soft:#44261a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Source Sans 3",system-ui,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:24px 16px 64px}
+h1{font:700 clamp(26px,5vw,38px)/1.1 "Bricolage Grotesque",system-ui,sans-serif;margin:0 0 8px}
+.intro{color:var(--muted);max-width:60ch;margin:0 0 20px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:16px}
+.track{flex:1;min-width:120px;height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.count{font-weight:600;min-width:90px}
+button{font:600 15px "Source Sans 3",system-ui,sans-serif;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:8px;padding:8px 16px;cursor:pointer}
+:root:not([data-theme="light"]) button.primary{color:#fff}
+@media (prefers-color-scheme:dark){button.primary{color:#0e1b1f}}
+button.ghost{background:transparent;color:var(--accent)}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+h2{font:700 18px "Bricolage Grotesque",system-ui,sans-serif;margin:0 0 10px}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.t,.d{width:100%;text-align:left;display:flex;gap:10px;align-items:flex-start;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-weight:400}
+.t:hover,.d:hover{border-color:var(--accent)}
+.t.active{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent)}
+.n{font-weight:700;min-width:1.6em}
+.chip{margin-left:auto;flex:none;min-width:30px;text-align:center;border-radius:6px;padding:0 8px;font-weight:700;background:var(--line);color:var(--ink)}
+.t .chip.empty{background:transparent;border:1.5px dashed var(--line);color:var(--muted)}
+.t.set .chip{background:var(--accent);color:#fff}
+@media (prefers-color-scheme:dark){.t.set .chip{color:#0e1b1f}}
+.t.ok{border-color:var(--ok);background:var(--ok-soft)}.t.ok .chip{background:var(--ok);color:#fff}
+.t.bad{border-color:var(--bad);background:var(--bad-soft)}.t.bad .chip{background:var(--bad);color:#fff}
+.fix{display:block;font-size:14px;color:var(--bad);margin-top:2px}
+.L{font-weight:700;min-width:1.6em;color:var(--accent)}
+.d.used{opacity:.5}
+.d.used .L::after{content:" ✓"}
+.hint{font-size:14px;color:var(--muted);margin:0 0 10px}
+#result{margin:12px 0 0;font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<h1>Genetics & Microfluidics: Matching Quiz</h1>
+<p class="intro">Pick a term on the left, then tap its definition on the right. Four definitions are extras and won’t be used. Covers Lectures 1–3.</p>
+<div class="bar">
+<span class="count" id="count">0 / 10 matched</span>
+<div class="track"><i id="fill"></i></div>
+<button class="primary" id="check" disabled>Check answers</button>
+<button class="ghost" id="reset">Start over</button>
+</div>
+<p id="result" role="status"></p>
+<div class="grid">
+<section><h2>Terms</h2><ul id="terms"></ul></section>
+<section><h2>Definitions</h2><p class="hint">Tapping a used definition moves it to the selected term.</p><ul id="defs"></ul></section>
+</div>
+</main>
+<script>
+const T=["Chromosomal Microarray Analysis (CMA)","Cell-Free Fetal DNA (cffDNA) / NIPT","Whole Exome Sequencing (WES)","PGT-M","Organ-on-Chip (OoC)","Lab-on-Chip","Allele Dropout","Fetal Fraction","Trophectoderm Biopsy","sFlt-1 / PIGF ratio"];
+const D={A:"Maternal blood screening for placental DNA (~10 weeks).",B:"% of maternal plasma cfDNA originating from the placenta.",C:"First-tier test detecting genome-wide CNVs (higher resolution than karyotype).",D:"Sequences protein-coding regions; misses balanced/repeat variants.",E:"Microfluidic device handling particles; lowers fluid volume/cost.",F:"Failure to amplify one allele, causing false genotypes.",G:"Standard Day 5–7 blastocyst embryo biopsy.",H:"Living cells + microfluidics + mechanics + microenvironment.",I:"Biomarkers for preeclampsia prediction.",J:"IVF embryo testing for specific single-gene disorders.",K:"3D stem cell culture lacking engineered fluid flow.",L:"Historical Day 3 cleavage-stage embryo biopsy.",M:"Mix of euploid/aneuploid cells; limits PGT-A accuracy.",N:"Drug journey: Absorption → Distribution → Metabolism → Excretion."};
+const KEY="CADJHEFBGI".split("");
+let ans=Array(10).fill(null),active=0,checked=false;
+const $=id=>document.getElementById(id);
+function render(){
+ $("terms").innerHTML=T.map((t,i)=>{
+  let cls="t"+(i===active&&!checked?" active":"")+(ans[i]?" set":"");
+  let fix="";
+  if(checked){cls+=ans[i]===KEY[i]?" ok":" bad";if(ans[i]!==KEY[i])fix=`<span class="fix">Correct: ${KEY[i]}. ${D[KEY[i]]}</span>`}
+  return `<li><button class="${cls}" data-i="${i}"><span class="n">${i+1}.</span><span>${t}${fix}</span><span class="chip${ans[i]?"":" empty"}">${ans[i]||"–"}</span></button></li>`}).join("");
+ $("defs").innerHTML=Object.keys(D).map(k=>`<li><button class="d${ans.includes(k)?" used":""}" data-k="${k}"${checked?" disabled":""}><span class="L">${k}.</span><span>${D[k]}</span></button></li>`).join("");
+ const n=ans.filter(Boolean).length;
+ $("count").textContent=n+" / 10 matched";$("fill").style.width=n*10+"%";
+ $("check").disabled=n<10||checked;
+}
+$("terms").onclick=e=>{const b=e.target.closest("[data-i]");if(b&&!checked){active=+b.dataset.i;render()}};
+$("defs").onclick=e=>{const b=e.target.closest("[data-k]");if(!b||checked)return;
+ const k=b.dataset.k,o=ans.indexOf(k);if(o>-1)ans[o]=null;
+ ans[active]=k;
+ const nx=ans.findIndex((a,i)=>!a&&i>active);const nx2=ans.findIndex(a=>!a);
+ active=nx>-1?nx:(nx2>-1?nx2:active);render()};
+$("check").onclick=()=>{checked=true;const s=ans.filter((a,i)=>a===KEY[i]).length;
+ $("result").textContent=`Score: ${s} / 10`+(s===10?" — perfect match.":". Review the terms marked in red.");render();window.scrollTo({top:0,behavior:"smooth"})};
+$("reset").onclick=()=>{ans=Array(10).fill(null);active=0;checked=false;$("result").textContent="";render()};
+render();
+</script>
+</body>
+</html>
